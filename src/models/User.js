@@ -60,4 +60,13 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
   });
 }
 
+UserSchema.methods.comparePasswordSync = function(candidatePassword) {
+  try {
+    return bcrypt.compareSync(candidatePassword, this.password);
+  }
+  catch(e) {
+    return false;
+  }
+}
+
 module.exports = mongoose.model('User', UserSchema);

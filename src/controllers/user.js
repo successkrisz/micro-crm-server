@@ -5,6 +5,7 @@ async function login(ctx, next) {
 }
 
 async function getAllUsers(ctx, next) {
+  console.log('get route');
   try {
     const users = await User.find();
     if (users === null || users.length === 0) {

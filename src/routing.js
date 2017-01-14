@@ -1,21 +1,22 @@
-import users from './routes/users';
+import user from './controllers/user';
+import {login, roleAuthorization} from './controllers/authentication';
 
 export default router => {
   const api = 'api'
   router.prefix(`/${api}`);
-  router.post('/login', users.login);
-  router.get('/users', users.getAllUsers)
-  router.post('/user', users.addUser);
-  router.get('/user/:id', users.getUser);
-  router.put('/user', users.updateUser);
-  router.delete('/user/:id', users.deleteUser);
+  router.post('/login', login);
+  router.get('/users', roleAuthorization(), user.getAllUsers)
+  router.post('/user', user.addUser);
+  router.get('/user/:id', roleAuthorization(), user.getUser);
+  router.put('/user', roleAuthorization(), user.updateUser);
+  router.delete('/user/:id', roleAuthorization(), user.deleteUser);
 
-  router.get('/clients', users.temp);
+  router.get('/clients', user.temp);
 
-  router.get('/client/:id', users.temp);
-  router.post('/client', users.temp);
-  router.put('/client', users.temp);
-  router.delete('/client', users.temp);
+  router.get('/client/:id', user.temp);
+  router.post('/client', user.temp);
+  router.put('/client', user.temp);
+  router.delete('/client', user.temp);
 
   return router;
 }
