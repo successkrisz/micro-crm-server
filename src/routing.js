@@ -1,4 +1,5 @@
 import user from './controllers/user';
+import client from './controllers/client';
 import {login, roleAuthorization} from './controllers/authentication';
 
 export default router => {
@@ -11,12 +12,12 @@ export default router => {
   router.put('/user', roleAuthorization(), user.updateUser);
   router.delete('/user/:id', roleAuthorization(), user.deleteUser);
 
-  router.get('/clients', user.temp);
+  router.get('/clients', client.getAllClients);
 
-  router.get('/client/:id', user.temp);
-  router.post('/client', user.temp);
-  router.put('/client', user.temp);
-  router.delete('/client', user.temp);
+  router.get('/client/:id', clients.getClient);
+  router.post('/client', clients.addClient);
+  router.put('/client', clients.updateClient);
+  router.delete('/client/:id', clients.deleteClient);
 
   return router;
 }

@@ -1,11 +1,6 @@
 import User from '../models/User';
 
-async function login(ctx, next) {
-  ctx.body = 'Matched Login';
-}
-
 async function getAllUsers(ctx, next) {
-  console.log('get route');
   try {
     const users = await User.find();
     if (users === null || users.length === 0) {
@@ -90,12 +85,7 @@ async function deleteUser(ctx, next) {
   }
 }
 
-async function temp(ctx, next) {
-  ctx.body = 'temp route';
-}
-
 export default {
-  login,
   temp,
   getAllUsers,
   addUser,
