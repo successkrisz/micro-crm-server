@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import chai from 'chai';
 import chaiHttp from 'chai-http';
 import server from '../src/index.js';
@@ -7,7 +6,7 @@ const should = chai.should();
 
 chai.use(chaiHttp);
 
-describe.skip('Test API endpoints', () => {
+describe('Test API endpoints', () => {
   beforeEach((done) => {
     User.remove({}, (err) => {
       done();

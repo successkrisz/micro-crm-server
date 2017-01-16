@@ -1,6 +1,6 @@
 import "babel-polyfill";
 import koa from 'koa';
-import mongooseConnect from './mongoose';
+//import mongooseConnect from './mongoose';
 import middleware from 'koa-router';
 import logger from 'koa-logger';
 import parser from 'koa-bodyparser';

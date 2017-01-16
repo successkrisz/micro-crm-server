@@ -30,7 +30,6 @@
      }
    } catch(e) {
      // TODO only supply a few details in error message
-     console.log(e);
      ctx.body = e;
    }
  }
@@ -38,23 +37,17 @@
 // verify if user is allowed to access content (always checking)
  export function roleAuthorization(role = 'Member') {
    return async function (ctx, next) {
-     if (ctx.cookies.get('token')) {
+     ctx.status = 401;
+     ctx.body = {redirect: 'login'};
+     if (ctx.header.authorization && ctx.header.authorization.split(' ')[0] === 'Bearer') {
        try {
-         const user = jwt.verify(ctx.cookies.get('token'), config.SECRET, {algorithms: ['HS256']});
+         const token = ctx.header.authorization.split(' ')[0];
+         const user = jwt.verify(token, config.SECRET, {algorithms: ['HS256']});
          const userInDB = await User.findOne({email: user.data.email});
          if (userInDB.role === role) {
            return await next();
-         } else {
-           ctx.status = 401;
-           ctx.body = {redirect: 'login'};
          }
-       } catch(e) {
-         ctx.status = 401;
-         ctx.body = {redirect: 'login'};
-       }
-     } else {
-       ctx.status = 401;
-       ctx.body = {redirect: 'login'};
+       } catch(e) {}
      }
    }
  }

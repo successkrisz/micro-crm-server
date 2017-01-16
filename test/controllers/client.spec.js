@@ -3,7 +3,7 @@ import client from '../../src/controllers/client';
 import Client from '../../src/models/Client';
 import mongoose from 'mongoose';
 import config from 'config';
-
+/*
 if (!mongoose.connection.readyState) {
 // Set up mongoose connection
   const options = {
@@ -13,7 +13,7 @@ if (!mongoose.connection.readyState) {
   mongoose.Promise = global.Promise;
   mongoose.connect(config.DBHost, options);
 }
-
+*/
 function mockCtx(body = {}){
   return {request: {body: body}, body: '', params: {id: ''}};
 }
