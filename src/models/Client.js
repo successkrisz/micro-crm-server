@@ -10,10 +10,10 @@ const ClientSchema = new Schema({
       '{VALUE} is not a valid email address!'
     ],
     lowercase: true,
-    unique: true
   },
   phone: {
-    type: Number,
+    type: String,
+    match: /[\d+]*/,
     min: 3,
     max: 13
   },

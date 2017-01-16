@@ -7,17 +7,17 @@ export default router => {
   router.prefix(`/${api}`);
   router.post('/login', login);
   router.get('/users', roleAuthorization(), user.getAllUsers)
-  router.post('/user', user.addUser);
+  router.post('/user', roleAuthorization(), user.addUser);
   router.get('/user/:id', roleAuthorization(), user.getUser);
   router.put('/user', roleAuthorization(), user.updateUser);
   router.delete('/user/:id', roleAuthorization(), user.deleteUser);
 
-  router.get('/clients', client.getAllClients);
+  router.get('/clients', roleAuthorization(), client.getAllClients);
 
-  router.get('/client/:id', clients.getClient);
-  router.post('/client', clients.addClient);
-  router.put('/client', clients.updateClient);
-  router.delete('/client/:id', clients.deleteClient);
+  router.get('/client/:id', roleAuthorization(), client.getClient);
+  router.post('/client', roleAuthorization(), client.addClient);
+  router.put('/client', roleAuthorization(), client.updateClient);
+  router.delete('/client/:id', roleAuthorization(), client.deleteClient);
 
   return router;
 }

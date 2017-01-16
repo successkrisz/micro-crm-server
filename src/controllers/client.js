@@ -1,4 +1,5 @@
 import Client from '../models/Client';
+const CLIENT_NOT_EXIST = {error: 'The requested client doesn\'t exist!'};
 
 async function getAllClients(ctx, next) {
   try {
@@ -14,18 +15,7 @@ async function getAllClients(ctx, next) {
 }
 
 async function addClient(ctx, next) {
-  const newClient = new Client({
-    email: ctx.request.body.email,
-    phone: ctx.request.body.phone,
-    postcode: ctx.request.body.postcode,
-    address: ctx.request.body.address,
-    notes: ctx.request.body.notes,
-    profile: {
-      firstName: ctx.request.body.firstName,
-      lastName: ctx.request.body.lastName,
-      birthday: ctx.request.body.birthday
-    }
-  });
+  const newClient = new Client(ctx.request.body);
   try {
     ctx.body = await newClient.save();
   } catch(e) {
@@ -37,12 +27,12 @@ async function getClient(ctx, next) {
   try {
     const client = await Client.findById(ctx.params.id);
     if (client === null) {
-      ctx.body = {error: 'The requested client doesn\'t exist!'};
+      ctx.body = CLIENT_NOT_EXIST;
     } else {
       ctx.body = client;
     }
   } catch(e) {
-      ctx.body = {error: 'The requested client doesn\'t exist!'}
+      ctx.body = CLIENT_NOT_EXIST
   }
 }
 
@@ -53,7 +43,7 @@ async function updateClient(ctx, next) {
   try {
     const client = await Client.findByIdAndUpdate(id, { $set: updatedClient }, { new: true, runValidators: true });
     if (client === null) {
-      ctx.body = {error: 'The requested client doesn\'t exist!'};
+      ctx.body = CLIENT_NOT_EXIST;
     } else {
       ctx.body = client;
     }
@@ -61,7 +51,7 @@ async function updateClient(ctx, next) {
     if (e.name === 'ValidationError') {
       ctx.body = e.errors;
     } else {
-      ctx.body = {error: 'The requested client doesn\'t exist!'};
+      ctx.body = CLIENT_NOT_EXIST;
     }
   }
 }
@@ -70,12 +60,12 @@ async function deleteClient(ctx, next) {
   try {
     const client = await Client.findByIdAndRemove(ctx.params.id);
     if (client === null) {
-      ctx.body = {error: 'The requested client doesn\'t exist!'};
+      ctx.body = CLIENT_NOT_EXIST;
     } else {
       ctx.body = client;
     }
   } catch(e) {
-    ctx.body = {error: 'The requested client doesn\'t exist!'};
+    ctx.body = CLIENT_NOT_EXIST;
   }
 }
 
@@ -84,5 +74,5 @@ export default {
   addClient,
   getClient,
   updateClient,
-  deleteClient
+  deleteClient,
 };

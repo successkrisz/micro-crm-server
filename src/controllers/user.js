@@ -1,4 +1,5 @@
 import User from '../models/User';
+const USER_NOT_EXIST = {error: 'The requested user doesn\'t exist!'};
 
 async function getAllUsers(ctx, next) {
   try {
@@ -18,11 +19,7 @@ async function getAllUsers(ctx, next) {
 }
 
 async function addUser(ctx, next) {
-  const newUser = new User({
-    email: ctx.request.body.email,
-    password: ctx.request.body.password,
-    profile: { firstName: ctx.request.body.firstName, lastName: ctx.request.body.lastName }
-  });
+  const newUser = new User(ctx.request.body);
   try {
     let user = await newUser.save();
     user['__v'] = undefined;
@@ -38,13 +35,15 @@ async function getUser(ctx, next) {
   try {
     user = await User.findById(ctx.params.id);
     if (user === null) {
-      ctx.body = {error: 'The requested user doesn\'t exist!'};
+      ctx.body = USER_NOT_EXIST;
     } else {
+      user['__v'] = undefined;
+      user['password'] = undefined;
       ctx.body = user;
     }
   } catch(e) {
       // if id cannot be accepted send the same error message
-      ctx.body = {error: 'The requested user doesn\'t exist!'}
+      ctx.body = USER_NOT_EXIST;
   }
 }
 
@@ -57,7 +56,7 @@ async function updateUser(ctx, next) {
     user['__v'] = undefined;
     user['password'] = undefined;
     if (user === null) {
-      ctx.body = {error: 'The requested user doesn\'t exist!'};
+      ctx.body = USER_NOT_EXIST;
     } else {
       ctx.body = user;
     }
@@ -65,7 +64,7 @@ async function updateUser(ctx, next) {
     if (e.name === 'ValidationError') {
       ctx.body = e.errors;
     } else {
-      ctx.body = {error: 'The requested user doesn\'t exist!'};
+      ctx.body = USER_NOT_EXIST;
     }
   }
 }
@@ -76,17 +75,16 @@ async function deleteUser(ctx, next) {
     user['__v'] = undefined;
     user['password'] = undefined;
     if (user === null) {
-      ctx.body = {error: 'The requested user doesn\'t exist!'};
+      ctx.body = USER_NOT_EXIST;
     } else {
       ctx.body = user;
     }
   } catch(e) {
-    ctx.body = {error: 'The requested user doesn\'t exist!'};
+    ctx.body = USER_NOT_EXIST;
   }
 }
 
 export default {
-  temp,
   getAllUsers,
   addUser,
   getUser,

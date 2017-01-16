@@ -1,224 +1,208 @@
-import mongoose from 'mongoose';
-import chai from 'chai';
-import chaiHttp from 'chai-http';
-import server from '../../src/index.js';
+import {expect} from 'chai';
+import user from '../../src/controllers/user';
 import User from '../../src/models/User';
-const should = chai.should();
+import mongoose from 'mongoose';
+import config from 'config';
 
-chai.use(chaiHttp);
+if (!mongoose.connection.readyState) {
+// Set up mongoose connection
+  const options = {
+    server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
+    replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } }
+  };
+  mongoose.Promise = global.Promise;
+  mongoose.connect(config.DBHost, options);
+}
 
-describe('Test User routes and controllers', () => {
+function mockCtx(body = {}){
+  return {request: {body: body}, body: '', params: {id: ''}};
+}
+
+
+describe('User Controller: ', () => {
   beforeEach((done) => {
     User.remove({}, (err) => {
       done();
     });
   });
 
-  it('/GET /api/users : returning {error: \'There\'s no users in the database!\'} when empty', (done) => {
-    chai.request(server)
-      .get('/api/users')
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a('object');
-        res.body.should.have.property('error').eql('There\'s no users in the database!');
-        done();
-      });
+  it('adduser saves user', async () => {
+    let ctx = mockCtx({
+      email: 'kriszi.balla@gmail.com',
+      password: 'password',
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
+    });
+    await user.addUser(ctx)
+    expect(ctx.body).to.have.property('_id');
+    expect(ctx.body).to.have.property('updatedAt');
+    expect(ctx.body).to.have.property('createdAt');
+    expect(ctx.body.password).to.equal(undefined);
+    expect(ctx.body.email).to.equal('kriszi.balla@gmail.com');
+    expect(ctx.body.profile.firstName).to.equal('Krisztian');
+    expect(ctx.body.profile.lastName).to.equal('Balla');
   });
 
-  it('/GET /api/users :  returning users when they exist', (done) => {
+  it('addUser returns error when no valid email is supplied', async () => {
+    let ctx = mockCtx({
+      email: 'kriszi.balla@gmail',
+      password: 'password',
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
+    });
+    await user.addUser(ctx)
+    expect(ctx.body.email.name).to.equal('ValidatorError');
+  });
+
+  it('getAllUsers returns all users in database', async () => {
+    let ctx = mockCtx();
     const user1 = new User({
       email: 'kriszi.balla@gmail.com',
       password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
     });
-    user1.save();
     const user2 = new User({
-      email: 'krisztian.balla@gmail.com',
+      email: 'dani.balla@gmail.com',
       password: 'password',
-      profile: { firstName: 'Krisztian', lastName: 'Balla' }
+      profile: {
+        firstName: 'Dani',
+        lastName: 'Balla'
+      }
     });
-    user2.save();
+    await user1.save();
+    await user2.save();
 
-    chai.request(server)
-      .get('/api/users')
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a('array');
-        res.body.length.should.be.eql(2);
-        res.body[0].should.have.property('email').eql('kriszi.balla@gmail.com');
-        res.body[0].should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
-        res.body[0].should.have.property('_id');
-        res.body[0].should.have.property('createdAt');
-        res.body[0].should.have.property('updatedAt');
-        res.body[0].should.have.property('role').eql('Member');
-        res.body[1].should.have.property('email').eql('krisztian.balla@gmail.com');
-        res.body[1].should.have.property('profile').eql({ firstName: 'Krisztian', lastName: 'Balla' });
-        res.body[1].should.have.property('_id');
-        res.body[1].should.have.property('createdAt');
-        res.body[1].should.have.property('updatedAt');
-        res.body[1].should.have.property('role').eql('Member');
-        done();
-      });
+    await user.getAllUsers(ctx);
+    expect(ctx.body[0].profile.lastName).to.equal('Balla');
+    expect(ctx.body[1].profile.lastName).to.equal('Balla');
   });
 
-  it('/POST /api/user : creates new user when email,password,first name and last name provided', (done) => {
-    const user = {
+  it('getUser returns user when id is a match', async () => {
+    let ctx = mockCtx();
+    const user1 = new User({
       email: 'kriszi.balla@gmail.com',
       password: 'password',
-      firstName: 'Kriszi',
-      lastName: 'Balla'
-    }
-    chai.request(server)
-      .post('/api/user')
-      .send(user)
-      .end((err,res) => {
-        res.should.have.status(200);
-        res.body.should.be.a('object');
-        res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
-        res.body.should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
-        res.body.should.have.property('_id');
-        res.body.should.have.property('createdAt');
-        res.body.should.have.property('updatedAt');
-        res.body.should.have.property('role').eql('Member');
-        done();
-      });
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
+    });
+    const savedUser = await user1.save();
+    ctx.params.id = savedUser['_id'];
+
+    await user.getUser(ctx);
+    expect(ctx.body).to.have.property('_id');
+    expect(ctx.body).to.have.property('updatedAt');
+    expect(ctx.body).to.have.property('createdAt');
+    expect(ctx.body.password).to.equal(undefined);
+    expect(ctx.body.email).to.equal('kriszi.balla@gmail.com');
+    expect(ctx.body.profile.firstName).to.equal('Krisztian');
+    expect(ctx.body.profile.lastName).to.equal('Balla');
   });
 
-  it('/POST /api/user : return error when password not provided', (done) => {
-    const user = {
-      email: 'kriszi.balla@gmail.com',
-      firstName: 'Kriszi',
-      lastName: 'Balla'
-    }
-    chai.request(server)
-      .post('/api/user')
-      .send(user)
-      .end((err,res) => {
-        res.should.have.status(200);
-        res.body.should.be.a('object');
-        res.body.should.have.property('password')
-        res.body.password.should.have.property('message');
-        res.body.password.message.should.eql('Password required!');
-        done();
-      });
-  });
-
-  it('/GET /api/user : return error when ID don\'t exist', (done) => {
-    chai.request(server)
-      .get('/api/user/123456789')
-      .end((err,res) => {
-        res.should.have.status(200);
-        res.body.should.be.a('object');
-        res.body.should.have.property('error')
-        res.body.error.should.eql('The requested user doesn\'t exist!');
-        done();
-      });
-  });
-
-  it('/GET /api/user : return User when ID exist', (done) => {
-    const user = new User({
+  it('getUser returns error message when id not exist', async () => {
+    let ctx = mockCtx();
+    const user1 = new User({
       email: 'kriszi.balla@gmail.com',
       password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
     });
-    user.save()
-      .then(savedUser => {
-        chai.request(server)
-          .get('/api/user/' + savedUser._id)
-          .end((err,res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
-            res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
-            res.body.should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
-            res.body.should.have.property('_id');
-            res.body.should.have.property('createdAt');
-            res.body.should.have.property('updatedAt');
-            res.body.should.have.property('role').eql('Member');
-            done();
-          });
-      });
+    await user1.save();
+    ctx.params.id = 'illegal id';
+
+    await user.getUser(ctx);;
+    expect(ctx.body).to.have.property('error');
+    expect(ctx.body.error).to.equal('The requested user doesn\'t exist!');
   });
 
-  it('/DELETE /api/user :  deleting user when ID exists', (done) => {
-    const user = new User({
+  it('updateUser update user when id exists', async () => {
+    const user1 = new User({
       email: 'kriszi.balla@gmail.com',
       password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
     });
-    user.save()
-      .then(savedUser => {
-        chai.request(server)
-        .delete('/api/user/' + savedUser._id)
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
-          res.body.should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
-          res.body.should.have.property('_id');
-          res.body.should.have.property('createdAt');
-          res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
-          done();
-        });
+    const savedUser = await user1.save();
+    let ctx = mockCtx({
+      _id: savedUser['_id'],
+      email: 'daniel.balla@gmail.com',
     });
+    await user.updateUser(ctx);
+    expect(ctx.body).to.have.property('_id');
+    expect(ctx.body).to.have.property('updatedAt');
+    expect(ctx.body).to.have.property('createdAt');
+    expect(ctx.body.email).to.equal('daniel.balla@gmail.com');
+    expect(ctx.body.profile.firstName).to.equal('Krisztian');
+    expect(ctx.body.profile.lastName).to.equal('Balla');
   });
 
-  it('/DELETE /api/user :  return error when ID don\'t exist', (done) => {
-    chai.request(server)
-    .delete('/api/user/123456789')
-    .end((err,res) => {
-      res.should.have.status(200);
-      res.body.should.be.a('object');
-      res.body.should.have.property('error').eql('The requested user doesn\'t exist!');
-      done();
-    });
-  });
-
-  it('/PUT /api/user :  return error when ID don\'t exist', (done) => {
-    const user = new User({
+  it('updateUser returns error when id doesn\'t exist', async () => {
+    const user1 = new User({
       email: 'kriszi.balla@gmail.com',
       password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
     });
-    user.save()
-      .then( (savedUser) => {
-        chai.request(server)
-        .put('/api/user')
-        .send(Object.assign({_id:'123456789'}, savedUser))
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('The requested user doesn\'t exist!');
-          done();
-        });
+    await user1.save();
+    let ctx = mockCtx({
+      _id: 'illegal id',
+      email: 'daniel.balla@gmail.com'
     });
+    await user.updateUser(ctx);
+    expect(ctx.body).to.have.property('error');
+    expect(ctx.body.error).to.equal('The requested user doesn\'t exist!');
   });
 
-  it('/PUT /api/user :  update user when ID exists', (done) => {
-    const user = new User({
+  it('deleteUser deletes user when id exist', async () => {
+    const user1 = new User({
       email: 'kriszi.balla@gmail.com',
       password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
     });
-    user.save()
-      .then(savedUser => {
-        savedUser.email = 'john.doe@yahoo.com';
-        savedUser.profile.firstName = 'John';
-        savedUser.profile.lastName = 'Doe';
-        chai.request(server)
-        .put('/api/user')
-        .send(savedUser)
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('email').eql('john.doe@yahoo.com');
-          res.body.should.have.property('profile').eql({ firstName: 'John', lastName: 'Doe' });
-          res.body.should.have.property('_id');
-          res.body.should.have.property('createdAt');
-          res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
-          done();
-        });
-    });
+    const savedUser = await user1.save();
+    let ctx = mockCtx();
+    ctx.params.id = savedUser['_id'];
+    await user.deleteUser(ctx);
+    expect(ctx.body).to.have.property('_id');
+    expect(ctx.body).to.have.property('updatedAt');
+    expect(ctx.body).to.have.property('createdAt');
+    expect(ctx.body.email).to.equal('kriszi.balla@gmail.com');
+    expect(ctx.body.profile.firstName).to.equal('Krisztian');
+    expect(ctx.body.profile.lastName).to.equal('Balla');
   });
+
+  it('deleteUser returns error when id doesn\'t exist', async () => {
+    const user1 = new User({
+      email: 'kriszi.balla@gmail.com',
+      password: 'password',
+      profile: {
+        firstName: 'Krisztian',
+        lastName: 'Balla'
+      }
+    });
+    await user1.save();
+    let ctx = mockCtx();
+    ctx.params.id = 'illegal id';
+    await user.deleteUser(ctx);
+    expect(ctx.body).to.have.property('error');
+    expect(ctx.body.error).to.equal('The requested user doesn\'t exist!');
+  });
+
 });
