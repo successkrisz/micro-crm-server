@@ -1,9 +1,6 @@
 import {expect} from 'chai';
-import config from 'config';
-
 import clientController from '../../src/controllers/clientController';
 import Client from '../../src/models/Client';
-import DbConnection from '../../src/mongoose';
 
 function mockCtx(body = {}){
   return {
@@ -16,7 +13,7 @@ function mockCtx(body = {}){
 
 describe('Client Controller: ', () => {
   beforeEach((done) => {
-    Client.remove({}, (err) => {
+    Client.remove({}, () => {
       done();
     });
   });
@@ -34,7 +31,7 @@ describe('Client Controller: ', () => {
         birthday: '01/01/1985'
       }
     });
-    await clientController.addClient(ctx)
+    await clientController.addClient(ctx);
     expect(ctx.body).to.have.property('_id');
     expect(ctx.body).to.have.property('updatedAt');
     expect(ctx.body).to.have.property('createdAt');
@@ -61,7 +58,7 @@ describe('Client Controller: ', () => {
         birthday: '01/01/1985'
       }
     });
-    await clientController.addClient(ctx)
+    await clientController.addClient(ctx);
     expect(ctx.body['profile.firstName'].name).to.equal('ValidatorError');
     expect(ctx.body['profile.lastName'].name).to.equal('ValidatorError');
   });
@@ -171,7 +168,7 @@ describe('Client Controller: ', () => {
         birthday: '01/01/1985'
       }
     });
-    const savedClient = await client1.save();
+    await client1.save();
     let ctx = mockCtx({
       _id: 'illegal id',
       email: 'daniel.balla@gmail.com',

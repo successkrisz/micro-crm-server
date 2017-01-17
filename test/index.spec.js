@@ -1,14 +1,10 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import config from 'config';
-import _debug from 'debug';
-
 import server from '../src/index.js';
 import User from '../src/models/User';
 import { generateToken } from '../src/controllers/authenticationController';
 
 const should = chai.should();
-const debug = _debug('app:test');
 
 chai.use(chaiHttp);
 
@@ -28,15 +24,15 @@ function createValidUser(firstName = 'Kriszi') {
 
 describe('Test API endpoints', () => {
   beforeEach((done) => {
-    User.remove({}, (err) => {
+    User.remove({}, () => {
       done();
     });
   });
-  
+
   it('/GET /api/users :  should return users when they exist', async () => {
     const user = await createValidUser();
     await createValidUser('Krisztian');
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .get('/api/users')
       .set('Authorization', authorizationHeader(user))
@@ -66,9 +62,9 @@ describe('Test API endpoints', () => {
       email: 'kriszi.balla@gmail.com',
       password: 'password',
       profile: { firstName: 'Kriszi', lastName: 'Balla' }
-    }
+    };
     const user = await createValidUser('Krisztian');
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .post('/api/user')
       .set('Authorization', authorizationHeader(user))
@@ -82,7 +78,7 @@ describe('Test API endpoints', () => {
         res.body.should.have.property('createdAt');
         res.body.should.have.property('updatedAt');
         res.body.should.have.property('role').eql('Member');
-        resolve()
+        resolve();
       });
     });
   });
@@ -92,9 +88,9 @@ describe('Test API endpoints', () => {
       email: 'kriszi.balla@gmail.com',
       firstName: 'Kriszi',
       lastName: 'Balla'
-    }
+    };
     const user = await createValidUser('Krisztian');
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .post('/api/user')
       .set('Authorization', authorizationHeader(user))
@@ -102,7 +98,7 @@ describe('Test API endpoints', () => {
       .end((err,res) => {
         res.should.have.status(200);
         res.body.should.be.a('object');
-        res.body.should.have.property('password')
+        res.body.should.have.property('password');
         res.body.password.should.have.property('message');
         res.body.password.message.should.eql('Password required!');
         resolve();
@@ -112,7 +108,7 @@ describe('Test API endpoints', () => {
 
   it('/GET /api/user : should return 404 when ID don\'t exist', async () => {
     const user = await createValidUser();
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .get('/api/user/123456789')
       .set('Authorization', authorizationHeader(user))
@@ -125,7 +121,7 @@ describe('Test API endpoints', () => {
 
   it('/GET /api/user : should return User when ID exist', async () => {
     const user = await createValidUser();
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .get('/api/user/' + user._id)
       .set('Authorization', authorizationHeader(user))
@@ -145,7 +141,7 @@ describe('Test API endpoints', () => {
 
   it('/DELETE /api/user : should delete user when ID exist', async () => {
     const user = await createValidUser();
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .delete('/api/user/' + user._id)
       .set('Authorization', authorizationHeader(user))
@@ -165,7 +161,7 @@ describe('Test API endpoints', () => {
 
   it('/DELETE /api/user : should return 404 when ID don\'t exist', async () => {
     const user = await createValidUser();
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .delete('/api/user/123456789')
       .set('Authorization', authorizationHeader(user))
@@ -178,7 +174,7 @@ describe('Test API endpoints', () => {
 
   it('/PUT /api/user : should return 404 when ID don\'t exist', async () => {
     const user = await createValidUser();
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .put('/api/user')
       .set('Authorization', authorizationHeader(user))
@@ -196,7 +192,7 @@ describe('Test API endpoints', () => {
     newUser.email = 'john.doe@yahoo.com';
     newUser.profile.firstName = 'John';
     newUser.profile.lastName = 'Doe';
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       chai.request(server)
       .put('/api/user')
       .set('Authorization', authorizationHeader(user))

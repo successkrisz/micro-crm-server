@@ -1,9 +1,6 @@
 import {expect} from 'chai';
-import config from 'config';
-
 import userController from '../../src/controllers/userController';
 import User from '../../src/models/User';
-import DbConnection from '../../src/mongoose';
 
 function mockCtx(body = {}){
   return {
@@ -16,7 +13,7 @@ function mockCtx(body = {}){
 
 describe('User Controller: ', () => {
   beforeEach((done) => {
-    User.remove({}, (err) => {
+    User.remove({}, () => {
       done();
     });
   });
@@ -30,7 +27,7 @@ describe('User Controller: ', () => {
         lastName: 'Balla'
       }
     });
-    await userController.addUser(ctx)
+    await userController.addUser(ctx);
     expect(ctx.body).to.have.property('_id');
     expect(ctx.body).to.have.property('updatedAt');
     expect(ctx.body).to.have.property('createdAt');
@@ -49,7 +46,7 @@ describe('User Controller: ', () => {
         lastName: 'Balla'
       }
     });
-    await userController.addUser(ctx)
+    await userController.addUser(ctx);
     expect(ctx.body.email.name).to.equal('ValidatorError');
   });
 
@@ -115,7 +112,7 @@ describe('User Controller: ', () => {
     await user1.save();
     ctx.params.id = 'illegal id';
 
-    await userController.getUser(ctx);;
+    await userController.getUser(ctx);
     expect(ctx.status).to.have.equal(404);
   });
 
