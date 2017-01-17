@@ -1,47 +1,45 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
+import config from 'config';
+import _debug from 'debug';
 
 import server from '../src/index.js';
 import User from '../src/models/User';
+import { generateToken } from '../src/controllers/authenticationController';
 
 const should = chai.should();
+const debug = _debug('app:test');
 
 chai.use(chaiHttp);
 
-describe.skip('Test API endpoints', () => {
+function authorizationHeader(user) {
+  return 'Bearer ' + generateToken(user);
+}
+
+function createValidUser(firstName = 'Kriszi') {
+  const user = new User({
+    email: firstName + '.balla@gmail.com',
+    password: 'password',
+    profile: { firstName: firstName, lastName: 'Balla' }
+  });
+  user.save();
+  return user;
+}
+
+describe('Test API endpoints', () => {
   beforeEach((done) => {
     User.remove({}, (err) => {
       done();
     });
   });
-
-  it('/GET /api/users : returning {error: \'There\'s no users in the database!\'} when empty', (done) => {
-    chai.request(server)
+  
+  it('/GET /api/users :  should return users when they exist', async () => {
+    const user = await createValidUser();
+    await createValidUser('Krisztian');
+    await new Promise((resolve, reject) => {
+      chai.request(server)
       .get('/api/users')
-      .end((err, res) => {
-        res.should.have.status(200);
-        res.body.should.be.a('object');
-        res.body.should.have.property('error').eql('There\'s no users in the database!');
-        done();
-      });
-  });
-
-  it('/GET /api/users :  returning users when they exist', (done) => {
-    const user1 = new User({
-      email: 'kriszi.balla@gmail.com',
-      password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
-    });
-    user1.save();
-    const user2 = new User({
-      email: 'krisztian.balla@gmail.com',
-      password: 'password',
-      profile: { firstName: 'Krisztian', lastName: 'Balla' }
-    });
-    user2.save();
-
-    chai.request(server)
-      .get('/api/users')
+      .set('Authorization', authorizationHeader(user))
       .end((err, res) => {
         res.should.have.status(200);
         res.body.should.be.a('array');
@@ -58,20 +56,23 @@ describe.skip('Test API endpoints', () => {
         res.body[1].should.have.property('createdAt');
         res.body[1].should.have.property('updatedAt');
         res.body[1].should.have.property('role').eql('Member');
-        done();
+        resolve();
       });
+    });
   });
 
-  it('/POST /api/user : creates new user when email,password,first name and last name provided', (done) => {
-    const user = {
+  it('/POST /api/user : should create new user when email,password,first name and last name provided', async () => {
+    const newUser = {
       email: 'kriszi.balla@gmail.com',
       password: 'password',
-      firstName: 'Kriszi',
-      lastName: 'Balla'
+      profile: { firstName: 'Kriszi', lastName: 'Balla' }
     }
-    chai.request(server)
+    const user = await createValidUser('Krisztian');
+    await new Promise((resolve, reject) => {
+      chai.request(server)
       .post('/api/user')
-      .send(user)
+      .set('Authorization', authorizationHeader(user))
+      .send(newUser)
       .end((err,res) => {
         res.should.have.status(200);
         res.body.should.be.a('object');
@@ -81,145 +82,136 @@ describe.skip('Test API endpoints', () => {
         res.body.should.have.property('createdAt');
         res.body.should.have.property('updatedAt');
         res.body.should.have.property('role').eql('Member');
-        done();
+        resolve()
       });
+    });
   });
 
-  it('/POST /api/user : return error when password not provided', (done) => {
-    const user = {
+  it('/POST /api/user : should return error when password not provided', async () => {
+    const newUser = {
       email: 'kriszi.balla@gmail.com',
       firstName: 'Kriszi',
       lastName: 'Balla'
     }
-    chai.request(server)
+    const user = await createValidUser('Krisztian');
+    await new Promise((resolve, reject) => {
+      chai.request(server)
       .post('/api/user')
-      .send(user)
+      .set('Authorization', authorizationHeader(user))
+      .send(newUser)
       .end((err,res) => {
         res.should.have.status(200);
         res.body.should.be.a('object');
         res.body.should.have.property('password')
         res.body.password.should.have.property('message');
         res.body.password.message.should.eql('Password required!');
-        done();
+        resolve();
       });
+    });
   });
 
-  it('/GET /api/user : return error when ID don\'t exist', (done) => {
-    chai.request(server)
+  it('/GET /api/user : should return 404 when ID don\'t exist', async () => {
+    const user = await createValidUser();
+    await new Promise((resolve, reject) => {
+      chai.request(server)
       .get('/api/user/123456789')
+      .set('Authorization', authorizationHeader(user))
+      .end((err,res) => {
+        res.should.have.status(404);
+        resolve();
+      });
+    });
+  });
+
+  it('/GET /api/user : should return User when ID exist', async () => {
+    const user = await createValidUser();
+    await new Promise((resolve, reject) => {
+      chai.request(server)
+      .get('/api/user/' + user._id)
+      .set('Authorization', authorizationHeader(user))
       .end((err,res) => {
         res.should.have.status(200);
         res.body.should.be.a('object');
-        res.body.should.have.property('error')
-        res.body.error.should.eql('The requested user doesn\'t exist!');
-        done();
+        res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
+        res.body.should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
+        res.body.should.have.property('_id');
+        res.body.should.have.property('createdAt');
+        res.body.should.have.property('updatedAt');
+        res.body.should.have.property('role').eql('Member');
+        resolve();
       });
+    });
   });
 
-  it('/GET /api/user : return User when ID exist', (done) => {
-    const user = new User({
-      email: 'kriszi.balla@gmail.com',
-      password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
-    });
-    user.save()
-      .then(savedUser => {
-        chai.request(server)
-          .get('/api/user/' + savedUser._id)
-          .end((err,res) => {
-            res.should.have.status(200);
-            res.body.should.be.a('object');
-            res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
-            res.body.should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
-            res.body.should.have.property('_id');
-            res.body.should.have.property('createdAt');
-            res.body.should.have.property('updatedAt');
-            res.body.should.have.property('role').eql('Member');
-            done();
-          });
+  it('/DELETE /api/user : should delete user when ID exist', async () => {
+    const user = await createValidUser();
+    await new Promise((resolve, reject) => {
+      chai.request(server)
+      .delete('/api/user/' + user._id)
+      .set('Authorization', authorizationHeader(user))
+      .end((err,res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('object');
+        res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
+        res.body.should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
+        res.body.should.have.property('_id');
+        res.body.should.have.property('createdAt');
+        res.body.should.have.property('updatedAt');
+        res.body.should.have.property('role').eql('Member');
+        resolve();
       });
-  });
-
-  it('/DELETE /api/user :  deleting user when ID exists', (done) => {
-    const user = new User({
-      email: 'kriszi.balla@gmail.com',
-      password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
-    });
-    user.save()
-      .then(savedUser => {
-        chai.request(server)
-        .delete('/api/user/' + savedUser._id)
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
-          res.body.should.have.property('profile').eql({ firstName: 'Kriszi', lastName: 'Balla' });
-          res.body.should.have.property('_id');
-          res.body.should.have.property('createdAt');
-          res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
-          done();
-        });
     });
   });
 
-  it('/DELETE /api/user :  return error when ID don\'t exist', (done) => {
-    chai.request(server)
-    .delete('/api/user/123456789')
-    .end((err,res) => {
-      res.should.have.status(200);
-      res.body.should.be.a('object');
-      res.body.should.have.property('error').eql('The requested user doesn\'t exist!');
-      done();
+  it('/DELETE /api/user : should return 404 when ID don\'t exist', async () => {
+    const user = await createValidUser();
+    await new Promise((resolve, reject) => {
+      chai.request(server)
+      .delete('/api/user/123456789')
+      .set('Authorization', authorizationHeader(user))
+      .end((err,res) => {
+        res.should.have.status(404);
+        resolve();
+      });
     });
   });
 
-  it('/PUT /api/user :  return error when ID don\'t exist', (done) => {
-    const user = new User({
-      email: 'kriszi.balla@gmail.com',
-      password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
-    });
-    user.save()
-      .then( (savedUser) => {
-        chai.request(server)
-        .put('/api/user')
-        .send(Object.assign({_id:'123456789'}, savedUser))
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('error').eql('The requested user doesn\'t exist!');
-          done();
-        });
+  it('/PUT /api/user : should return 404 when ID don\'t exist', async () => {
+    const user = await createValidUser();
+    await new Promise((resolve, reject) => {
+      chai.request(server)
+      .put('/api/user')
+      .set('Authorization', authorizationHeader(user))
+      .send(Object.assign({_id:'123456789'}, user))
+      .end((err,res) => {
+        res.should.have.status(404);
+        resolve();
+      });
     });
   });
 
-  it('/PUT /api/user :  update user when ID exists', (done) => {
-    const user = new User({
-      email: 'kriszi.balla@gmail.com',
-      password: 'password',
-      profile: { firstName: 'Kriszi', lastName: 'Balla' }
-    });
-    user.save()
-      .then(savedUser => {
-        savedUser.email = 'john.doe@yahoo.com';
-        savedUser.profile.firstName = 'John';
-        savedUser.profile.lastName = 'Doe';
-        chai.request(server)
-        .put('/api/user')
-        .send(savedUser)
-        .end((err,res) => {
-          res.should.have.status(200);
-          res.body.should.be.a('object');
-          res.body.should.have.property('email').eql('john.doe@yahoo.com');
-          res.body.should.have.property('profile').eql({ firstName: 'John', lastName: 'Doe' });
-          res.body.should.have.property('_id');
-          res.body.should.have.property('createdAt');
-          res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
-          done();
-        });
+  it('/PUT /api/user : should update user when ID exists', async () => {
+    const user = await createValidUser();
+    let newUser = Object.assign({}, user._doc);
+    newUser.email = 'john.doe@yahoo.com';
+    newUser.profile.firstName = 'John';
+    newUser.profile.lastName = 'Doe';
+    await new Promise((resolve, reject) => {
+      chai.request(server)
+      .put('/api/user')
+      .set('Authorization', authorizationHeader(user))
+      .send(newUser)
+      .end((err,res) => {
+        res.should.have.status(200);
+        res.body.should.be.a('object');
+        res.body.should.have.property('email').eql('john.doe@yahoo.com');
+        res.body.should.have.property('profile').eql({ firstName: 'John', lastName: 'Doe' });
+        res.body.should.have.property('_id');
+        res.body.should.have.property('createdAt');
+        res.body.should.have.property('updatedAt');
+        res.body.should.have.property('role').eql('Member');
+        resolve();
+      });
     });
   });
 });

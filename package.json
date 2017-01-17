@@ -1,8 +1,12 @@
 {
   "name": "mini-crm-server",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "mini crm server",
   "main": "src/index.js",
+  "engines": {
+    "node": ">=5.2.0",
+    "npm": "^3.0.0"
+  },
   "scripts": {
     "clean": "rimraf build",
     "start": "better-npm-run start",

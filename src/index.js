@@ -22,13 +22,13 @@ connectToDB();
 const app = new koa();
 
 if (notTest) app.use(convert(logger()));
-if (config.LOGGING_CONTEXT) app.use(contextLogger);
+if (notTest) app.use(contextLogger);
 
 app
   .use(convert(parser()))
   .use(router.routes())
   .use(router.allowedMethods());
 
-if (notTest) {
-  app.listen(config.PORT, () => debug('Server running at: http://localhost:' + config.PORT));
-}
+const server = app.listen(config.PORT, () => debug('Server running at: http://localhost:' + config.PORT));
+
+export default server;

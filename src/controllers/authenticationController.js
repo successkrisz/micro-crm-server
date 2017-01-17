@@ -34,7 +34,7 @@ export function roleAuthorization(role = 'Member') {
       return ctx.status = 401;
     }
     try {
-      const token = ctx.header.authorization.split(' ')[0];
+      const token = ctx.header.authorization.split(' ')[1];
       const user = verifyToken(token);
       const userInDB = await User.findOne({email: user.data.email});
       if (userInDB.role === 'Owner') return await next();
