@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt-nodejs');
+import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const ClientSchema = new Schema({
@@ -26,9 +25,9 @@ const ClientSchema = new Schema({
   },
   notes: { type: String }
 },
-{
-  timestamps: true
-});
+  {
+    timestamps: true
+  });
 
 ClientSchema.set('collection', 'clients');
 

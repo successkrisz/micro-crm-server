@@ -15,7 +15,7 @@ async function getAllClients(ctx) {
   }
 }
 
-async function addClient(ctx, next) {
+async function addClient(ctx) {
   const newClient = new Client(ctx.request.body);
   try {
     ctx.body = await newClient.save();

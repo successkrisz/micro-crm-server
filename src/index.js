@@ -1,4 +1,4 @@
-import "babel-polyfill";
+import 'babel-polyfill';
 import config from 'config';
 import _debug from 'debug';
 import koa from 'koa';
@@ -17,6 +17,8 @@ async function contextLogger(ctx, next) {
   return await next();
 }
 
+connectToDB();
+
 const app = new koa();
 
 if (notTest) app.use(convert(logger()));
@@ -25,8 +27,8 @@ if (config.LOGGING_CONTEXT) app.use(contextLogger);
 app
   .use(convert(parser()))
   .use(router.routes())
-  .use(router.allowedMethods())
+  .use(router.allowedMethods());
 
 if (notTest) {
-  app.listen(config.PORT, () => debug("Server running at: http://localhost:" + config.PORT));
+  app.listen(config.PORT, () => debug('Server running at: http://localhost:' + config.PORT));
 }

@@ -4,7 +4,7 @@ import _debug from 'debug';
 
 const debug = _debug('app:db');
 
-function connectToDB() {
+export default function () {
   if (mongoose.connection.readyState) return;
   const keepAlive = (config.DBKeepAlive) ? 1 : 0;
   const options = {
@@ -39,10 +39,8 @@ function connectToDB() {
 
   process.on('SIGINT', () => {
     mongoose.connection.close(() => {
-    debug('Mongoose connection disconnected through app termination');
-    process.exit(0);
+      debug('Mongoose connection disconnected through app termination');
+      process.exit(0);
     });
   });
 }
-
-export default connectToDB();

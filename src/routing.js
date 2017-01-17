@@ -1,15 +1,15 @@
-import koaRouter from 'koa-router';
+import _router from 'koa-router';
 
 import userController from './controllers/userController';
 import clientController from './controllers/clientController';
 import { login, roleAuthorization } from './controllers/authenticationController';
 
 const api = 'api';
-const router = koaRouter();
+const router = _router();
 
 router.prefix(`/${api}`);
 router.post('/login', login);
-router.get('/users', roleAuthorization(), userController.getAllUsers)
+router.get('/users', roleAuthorization(), userController.getAllUsers);
 router.post('/user', roleAuthorization(), userController.addUser);
 router.get('/user/:id', roleAuthorization(), userController.getUser);
 router.put('/user', roleAuthorization(), userController.updateUser);

@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcrypt-nodejs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcrypt-nodejs';
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
@@ -29,9 +29,9 @@ const UserSchema = new Schema({
   resetPasswordToken: { type: String },
   resetPasswordExpires: { type: Date }
 },
-{
-  timestamps: true
-});
+  {
+    timestamps: true
+  });
 
 UserSchema.set('collection', 'users');
 
@@ -58,7 +58,7 @@ UserSchema.methods.comparePassword = function(candidatePassword, cb) {
 
     cb(null, isMatch);
   });
-}
+};
 
 UserSchema.methods.comparePasswordSync = function(candidatePassword) {
   try {
@@ -67,6 +67,6 @@ UserSchema.methods.comparePasswordSync = function(candidatePassword) {
   catch(e) {
     return false;
   }
-}
+};
 
 module.exports = mongoose.model('User', UserSchema);

@@ -10,7 +10,7 @@ export function generateToken(user) {
       email: user.email,
       role: user.role
     }
-  }, config.SECRET, { algorithm: config.ALGORITHM})
+  }, config.SECRET, { algorithm: config.ALGORITHM});
 }
 
 function verifyToken(token) {
@@ -24,7 +24,7 @@ export async function login(ctx) {
     if (!match) return ctx.body = {error: 'You\'ve provided a wrong email address or password. Please try again!'};
     ctx.body = { token: generateToken(user) };
   } catch(e) {
-      ctx.body = e;
+    ctx.body = e;
   }
 }
 
@@ -40,9 +40,9 @@ export function roleAuthorization(role = 'Member') {
       if (userInDB.role === 'Owner') return await next();
       if (userInDB.role === 'Admin' && role !== 'Owner') return await next();
       if (userInDB.role !== role) return ctx.status = 403;
-      return await next()
+      return await next();
     } catch(e) {
       ctx.status = 401;
     }
-  }
+  };
 }
