@@ -1,21 +1,17 @@
 import {expect} from 'chai';
-import client from '../../src/controllers/client';
-import Client from '../../src/models/Client';
-import mongoose from 'mongoose';
 import config from 'config';
-/*
-if (!mongoose.connection.readyState) {
-// Set up mongoose connection
-  const options = {
-    server: { socketOptions: { keepAlive: 1, connectTimeoutMS: 30000 } },
-    replset: { socketOptions: { keepAlive: 1, connectTimeoutMS : 30000 } }
-  };
-  mongoose.Promise = global.Promise;
-  mongoose.connect(config.DBHost, options);
-}
-*/
+
+import clientController from '../../src/controllers/clientController';
+import Client from '../../src/models/Client';
+import DbConnection from '../../src/mongoose';
+
 function mockCtx(body = {}){
-  return {request: {body: body}, body: '', params: {id: ''}};
+  return {
+    request: {body: body},
+    body: '',
+    status: '',
+    params: {id: ''}
+  };
 }
 
 describe('Client Controller: ', () => {
@@ -25,7 +21,7 @@ describe('Client Controller: ', () => {
     });
   });
 
-  it('addClient saves client', async () => {
+  it('addClient should save client if firstname lastname and email is present', async () => {
     let ctx = mockCtx({
       email: 'kriszi.ballaz@gmail.com',
       phone: '123456789',
@@ -38,7 +34,7 @@ describe('Client Controller: ', () => {
         birthday: '01/01/1985'
       }
     });
-    await client.addClient(ctx)
+    await clientController.addClient(ctx)
     expect(ctx.body).to.have.property('_id');
     expect(ctx.body).to.have.property('updatedAt');
     expect(ctx.body).to.have.property('createdAt');
@@ -52,7 +48,7 @@ describe('Client Controller: ', () => {
     expect(ctx.body.profile.birthday).to.equal('01/01/1985');
   });
 
-  it('addClient returns error when no name is supplied', async () => {
+  it('addClient should return error when no name is supplied', async () => {
     let ctx = mockCtx({
       email: 'kriszi.ballaz@gmail.com',
       phone: '123456789',
@@ -65,12 +61,12 @@ describe('Client Controller: ', () => {
         birthday: '01/01/1985'
       }
     });
-    await client.addClient(ctx)
+    await clientController.addClient(ctx)
     expect(ctx.body['profile.firstName'].name).to.equal('ValidatorError');
     expect(ctx.body['profile.lastName'].name).to.equal('ValidatorError');
   });
 
-  it('getAllClients returns all clients in database', async () => {
+  it('getAllClients should return all clients in database', async () => {
     let ctx = mockCtx();
     const client1 = new Client({
       email: 'kriszi.balla@gmail.com',
@@ -91,14 +87,14 @@ describe('Client Controller: ', () => {
     await client1.save();
     await client2.save();
 
-    await client.getAllClients(ctx);
+    await clientController.getAllClients(ctx);
     expect(ctx.body[0].profile.lastName).to.equal('Balla');
     expect(ctx.body[0].profile.birthday).to.equal('01/01/1985');
     expect(ctx.body[1].profile.lastName).to.equal('Balla');
     expect(ctx.body[1].profile.birthday).to.equal('01/01/1985');
   });
 
-  it('getClient returns client when id is a match', async () => {
+  it('getClient should return client when id is a match', async () => {
     let ctx = mockCtx();
     const client1 = new Client({
       email: 'kriszi.balla@gmail.com',
@@ -111,7 +107,7 @@ describe('Client Controller: ', () => {
     const savedClient = await client1.save();
     ctx.params.id = savedClient['_id'];
 
-    await client.getClient(ctx);
+    await clientController.getClient(ctx);
     expect(ctx.body).to.have.property('_id');
     expect(ctx.body).to.have.property('updatedAt');
     expect(ctx.body).to.have.property('createdAt');
@@ -121,7 +117,7 @@ describe('Client Controller: ', () => {
     expect(ctx.body.profile.birthday).to.equal('01/01/1985');
   });
 
-  it('getClient returns error message when id not exist', async () => {
+  it('getClient should return 404 when id not exist', async () => {
     let ctx = mockCtx();
     const client1 = new Client({
       email: 'kriszi.balla@gmail.com',
@@ -133,12 +129,11 @@ describe('Client Controller: ', () => {
     });
     await client1.save();
     ctx.params.id = 'illegal id';
-    await client.getClient(ctx);
-    expect(ctx.body).to.have.property('error');
-    expect(ctx.body.error).to.equal('The requested client doesn\'t exist!');
+    await clientController.getClient(ctx);
+    expect(ctx.status).to.have.equal(404);
   });
 
-  it('updateClient update client when id exists', async () => {
+  it('updateClient should update client when id exists', async () => {
     const client1 = new Client({
       email: 'kriszi.balla@gmail.com',
       profile: {
@@ -157,7 +152,7 @@ describe('Client Controller: ', () => {
         birthday: '01/01/1987'
       }
     });
-    await client.updateClient(ctx);
+    await clientController.updateClient(ctx);
     expect(ctx.body).to.have.property('_id');
     expect(ctx.body).to.have.property('updatedAt');
     expect(ctx.body).to.have.property('createdAt');
@@ -167,7 +162,7 @@ describe('Client Controller: ', () => {
     expect(ctx.body.profile.birthday).to.equal('01/01/1987');
   });
 
-  it('updateClient returns error when id doesn\'t exist', async () => {
+  it('updateClient should return 404 when id doesn\'t exist', async () => {
     const client1 = new Client({
       email: 'kriszi.balla@gmail.com',
       profile: {
@@ -186,12 +181,11 @@ describe('Client Controller: ', () => {
         birthday: '01/01/1987'
       }
     });
-    await client.updateClient(ctx);
-    expect(ctx.body).to.have.property('error');
-    expect(ctx.body.error).to.equal('The requested client doesn\'t exist!');
+    await clientController.updateClient(ctx);
+    expect(ctx.status).to.have.equal(404);
   });
 
-  it('deleteClient deletes client when id exist', async () => {
+  it('deleteClient should delete client when id exists', async () => {
     const client1 = new Client({
       email: 'kriszi.balla@gmail.com',
       profile: {
@@ -203,7 +197,7 @@ describe('Client Controller: ', () => {
     const savedClient = await client1.save();
     let ctx = mockCtx();
     ctx.params.id = savedClient['_id'];
-    await client.deleteClient(ctx);
+    await clientController.deleteClient(ctx);
     expect(ctx.body).to.have.property('_id');
     expect(ctx.body).to.have.property('updatedAt');
     expect(ctx.body).to.have.property('createdAt');
@@ -213,7 +207,7 @@ describe('Client Controller: ', () => {
     expect(ctx.body.profile.birthday).to.equal('01/01/1985');
   });
 
-  it('deleteClient returns error when id doesn\'t exist', async () => {
+  it('deleteClient should return 404 when id doesn\'t exist', async () => {
     const client1 = new Client({
       email: 'kriszi.balla@gmail.com',
       profile: {
@@ -225,9 +219,8 @@ describe('Client Controller: ', () => {
     await client1.save();
     let ctx = mockCtx();
     ctx.params.id = 'illegal id';
-    await client.deleteClient(ctx);
-    expect(ctx.body).to.have.property('error');
-    expect(ctx.body.error).to.equal('The requested client doesn\'t exist!');
+    await clientController.deleteClient(ctx);
+    expect(ctx.status).to.have.equal(404);
   });
 
 });

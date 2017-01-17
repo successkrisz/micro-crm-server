@@ -1,23 +1,25 @@
-import user from './controllers/user';
-import client from './controllers/client';
-import {login, roleAuthorization} from './controllers/authentication';
+import koaRouter from 'koa-router';
 
-export default router => {
-  const api = 'api'
-  router.prefix(`/${api}`);
-  router.post('/login', login);
-  router.get('/users', roleAuthorization(), user.getAllUsers)
-  router.post('/user', roleAuthorization(), user.addUser);
-  router.get('/user/:id', roleAuthorization(), user.getUser);
-  router.put('/user', roleAuthorization(), user.updateUser);
-  router.delete('/user/:id', roleAuthorization(), user.deleteUser);
+import userController from './controllers/userController';
+import clientController from './controllers/clientController';
+import { login, roleAuthorization } from './controllers/authenticationController';
 
-  router.get('/clients', roleAuthorization(), client.getAllClients);
+const api = 'api';
+const router = koaRouter();
 
-  router.get('/client/:id', roleAuthorization(), client.getClient);
-  router.post('/client', roleAuthorization(), client.addClient);
-  router.put('/client', roleAuthorization(), client.updateClient);
-  router.delete('/client/:id', roleAuthorization(), client.deleteClient);
+router.prefix(`/${api}`);
+router.post('/login', login);
+router.get('/users', roleAuthorization(), userController.getAllUsers)
+router.post('/user', roleAuthorization(), userController.addUser);
+router.get('/user/:id', roleAuthorization(), userController.getUser);
+router.put('/user', roleAuthorization(), userController.updateUser);
+router.delete('/user/:id', roleAuthorization(), userController.deleteUser);
 
-  return router;
-}
+router.get('/clients', roleAuthorization(), clientController.getAllClients);
+
+router.get('/client/:id', roleAuthorization(), clientController.getClient);
+router.post('/client', roleAuthorization(), clientController.addClient);
+router.put('/client', roleAuthorization(), clientController.updateClient);
+router.delete('/client/:id', roleAuthorization(), clientController.deleteClient);
+
+export default router;

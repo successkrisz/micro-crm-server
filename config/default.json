@@ -1,5 +1,9 @@
 {
     "DBHost": "mongodb://localhost:27017/crm",
+    "DBKeepAlive": true,
+    "DBConnectTimeoutMS": 30000,
     "PORT": "3003",
-    "SECRET": "boaconstrictor"
+    "SECRET": "boaconstrictor",
+    "ALGORITHM": "HS256",
+    "LOGGING_CONTEXT": true
 }

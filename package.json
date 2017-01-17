@@ -4,16 +4,46 @@
   "description": "mini crm server",
   "main": "src/index.js",
   "scripts": {
-    "start": "cross-env NODE_ENV=dev nodemon src/index.js --exec babel-node",
-    "build": "babel src -d build",
-    "serve": "cross-env NODE_ENV=prod node build/index.js",
-    "test": "cross-env NODE_ENV=test mocha --compilers js:babel-core/register --require ./test/test_helper.js --recursive",
-    "test:wait": "cross-env NODE_ENV=test mocha --compilers js:babel-core/register --require ./test/test_helper.js --recursive --timeout 10000",
+    "clean": "rimraf build",
+    "start": "better-npm-run start",
+    "lint": "eslint src test config",
+    "lint:fix": "npm run lint -- --fix",
+    "build": "npm run clean && babel src -d build",
+    "serve": "better-npm-run serve",
+    "test": "better-npm-run test",
+    "test:wait": "npm run test -- --timeout 10000",
     "test:watch": "npm run test -- --watch",
     "db": "mongod --dbpath=./data"
   },
-  "author": "Krisztian Balla",
-  "license": "ISC",
+  "betterScripts": {
+    "start": {
+      "command": "nodemon src/index.js --exec babel-node",
+      "env": {
+        "NODE_ENV": "dev",
+        "DEBUG": "app:*"
+      }
+    },
+    "serve": {
+      "command": "node build/index.js",
+      "env": {
+        "NODE_ENV": "prod",
+        "DEBUG": "app:*"
+      }
+    },
+    "test": {
+      "command": "mocha --compilers js:babel-core/register --require ./test/test_helper.js --recursive",
+      "env": {
+        "NODE_ENV": "test",
+        "DEBUG": "app:*"
+      }
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/successkrisz/micro-crm-server.git"
+  },
+  "author": "Krisztian Balla <kriszi.balla@gmail.com>",
+  "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.18.0",
     "babel-polyfill": "^6.20.0",
@@ -27,11 +57,14 @@
   },
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
+    "better-npm-run": "0.0.14",
     "config": "^1.24.0",
+    "debug": "^2.6.0",
     "immutable": "^3.8.1",
     "jsonwebtoken": "^7.2.1",
     "koa": "^2.0.0-alpha.7",
     "koa-bodyparser": "^2.3.0",
+    "koa-convert": "^1.2.0",
     "koa-logger": "^1.3.1",
     "koa-router": "^7.0.1",
     "mongoose": "^4.7.6"
