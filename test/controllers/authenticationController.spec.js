@@ -9,89 +9,89 @@ import {
 const isToken = /^\S*\.\S*\.\S*$/;
 
 function mockCtx(body = {}){
-  return {
-    body: '',
-    header: '',
-    params: {id: ''},
-    request: {body: body},
-    status: '',
-  };
+    return {
+        body: '',
+        header: '',
+        params: {id: ''},
+        request: {body: body},
+        status: '',
+    };
 }
 
 function createValidUser(firstName = 'Kriszi') {
-  const user = new User({
-    email: `${firstName}.balla@gmail.com`,
-    password: 'password',
-    profile: { firstName: firstName, lastName: 'Balla' }
-  });
-  return user.save();
+    const user = new User({
+        email: `${firstName}.balla@gmail.com`,
+        password: 'password',
+        profile: { firstName: firstName, lastName: 'Balla' }
+    });
+    return user.save();
 }
 
 describe('testing authenticationController', () => {
-  beforeEach(async () => {
-    await User.remove({});
-    await createValidUser();
-  });
-
-  it('generateToken should return jwt token', () => {
-    const user = {
-      email: 'email@gmail.com',
-      role: 'Member'
-    };
-    const jwt = generateToken(user);
-    const matchingPattern = isToken.test(jwt);
-    expect(matchingPattern).to.equal(true);
-  });
-
-  it('login should return token when when email and password match', async () => {
-    let ctx = mockCtx({
-      email: 'kriszi.balla@gmail.com',
-      password: 'password'
+    beforeEach(async () => {
+        await User.remove({});
+        await createValidUser();
     });
-    await login(ctx);
-    expect(ctx.body).to.have.property('token');
-    const matchingPattern = isToken.test(ctx.body.token);
-    expect(matchingPattern).to.equal(true);
-  });
 
-  it('login should return error when when email and password don\'t match', async () => {
-    let ctx = mockCtx({
-      email: 'kriszi.balla@gmail.com',
-      password: 'wrongPass'
+    it('generateToken should return jwt token', () => {
+        const user = {
+            email: 'email@gmail.com',
+            role: 'Member'
+        };
+        const jwt = generateToken(user);
+        const matchingPattern = isToken.test(jwt);
+        expect(matchingPattern).to.equal(true);
     });
-    await login(ctx);
-    expect(ctx.body).to.have.property('error');
-    expect(ctx.body.error).to.equal('You\'ve provided a wrong email address or password. Please try again!');
-  });
 
-  it('roleAuthorization should return 401 if there\'s no token', async () => {
-    let ctx = mockCtx();
-    await roleAuthorization()(ctx);
-    expect(ctx.status).to.equal(401);
-  });
+    it('login should return token when when email and password match', async () => {
+        let ctx = mockCtx({
+            email: 'kriszi.balla@gmail.com',
+            password: 'password'
+        });
+        await login(ctx);
+        expect(ctx.body).to.have.property('token');
+        const matchingPattern = isToken.test(ctx.body.token);
+        expect(matchingPattern).to.equal(true);
+    });
 
-  it('roleAuthorization should return 403 when role is not sufficient', async () => {
-    let ctx = mockCtx();
-    const user = {
-      email: 'kriszi.balla@gmail.com',
-      role: 'Member'
-    };
-    const jwt = generateToken(user);
-    ctx.header = { authorization: `Bearer ${jwt}` };
-    await roleAuthorization('Admin')(ctx);
-    expect(ctx.status).to.equal(403);
-  });
+    it('login should return error when when email and password don\'t match', async () => {
+        let ctx = mockCtx({
+            email: 'kriszi.balla@gmail.com',
+            password: 'wrongPass'
+        });
+        await login(ctx);
+        expect(ctx.body).to.have.property('error');
+        expect(ctx.body.error).to.equal('You\'ve provided a wrong email address or password. Please try again!');
+    });
 
-  it('roleAuthorization should call next() when role is sufficient', async () => {
-    let ctx = mockCtx();
-    const user = {
-      email: 'kriszi.balla@gmail.com',
-      role: 'Member'
-    };
-    const jwt = generateToken(user);
-    ctx.header = { authorization: `Bearer ${jwt}` };
-    const mockNext = () => { ctx.status = 200; };
-    await roleAuthorization()(ctx, mockNext);
-    expect(ctx.status).to.equal(200);
-  });
+    it('roleAuthorization should return 401 if there\'s no token', async () => {
+        let ctx = mockCtx();
+        await roleAuthorization()(ctx);
+        expect(ctx.status).to.equal(401);
+    });
+
+    it('roleAuthorization should return 403 when role is not sufficient', async () => {
+        let ctx = mockCtx();
+        const user = {
+            email: 'kriszi.balla@gmail.com',
+            role: 'Member'
+        };
+        const jwt = generateToken(user);
+        ctx.header = { authorization: `Bearer ${jwt}` };
+        await roleAuthorization('Admin')(ctx);
+        expect(ctx.status).to.equal(403);
+    });
+
+    it('roleAuthorization should call next() when role is sufficient', async () => {
+        let ctx = mockCtx();
+        const user = {
+            email: 'kriszi.balla@gmail.com',
+            role: 'Member'
+        };
+        const jwt = generateToken(user);
+        ctx.header = { authorization: `Bearer ${jwt}` };
+        const mockNext = () => { ctx.status = 200; };
+        await roleAuthorization()(ctx, mockNext);
+        expect(ctx.status).to.equal(200);
+    });
 });

@@ -22,14 +22,14 @@
   },
   "betterScripts": {
     "start": {
-      "command": "nodemon src/index.js --exec babel-node",
+      "command": "nodemon src/bin/server.js --exec babel-node",
       "env": {
         "NODE_ENV": "dev",
         "DEBUG": "app:*"
       }
     },
     "serve": {
-      "command": "node build/index.js",
+      "command": "node build/server.js",
       "env": {
         "NODE_ENV": "prod",
         "DEBUG": "app:*"

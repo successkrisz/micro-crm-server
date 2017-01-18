@@ -19,12 +19,12 @@
     }
   },
   "rules": {
-    "indent": ["error", 2],
+    "indent": ["error", 4],
     "max-len": [2, 120, 2],
     "generator-star-spacing": ["error", "before"],
     "linebreak-style": ["error", "unix"],
     "quotes": ["warn", "single"],
-    "semi": ["error", "always"],
+    "semi": [2, "always"],
     "no-unused-vars": ["warn"]
   }
 }
