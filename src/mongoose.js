@@ -1,10 +1,9 @@
 import mongoose from 'mongoose';
-import config from 'config';
 import _debug from 'debug';
 
 const debug = _debug('app:db');
 
-export default function () {
+export default function (config) {
   if (mongoose.connection.readyState) return;
   const keepAlive = (config.DBKeepAlive) ? 1 : 0;
   const options = {

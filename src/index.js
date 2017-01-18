@@ -10,19 +10,19 @@ import connectToDB from './mongoose';
 import router from './routing';
 
 const debug = _debug('app:server');
-const notTest = (process.env.NODE_ENV != 'test');
+const isTestEnv = (process.env.NODE_ENV === 'test');
 
 async function contextLogger(ctx, next) {
   debug(ctx);
   return await next();
 }
 
-connectToDB();
+connectToDB(config);
 
 const app = new koa();
 
-if (notTest) app.use(convert(logger()));
-if (notTest) app.use(contextLogger);
+if (!isTestEnv) app.use(convert(logger()));
+if (!isTestEnv) app.use(contextLogger);
 
 app
   .use(convert(parser()))
