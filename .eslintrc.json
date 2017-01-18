@@ -24,6 +24,7 @@
     "generator-star-spacing": ["error", "before"],
     "linebreak-style": ["error", "unix"],
     "quotes": ["warn", "single"],
-    "semi": ["error", "always"]
+    "semi": ["error", "always"],
+    "no-unused-vars": ["warn"]
   }
 }

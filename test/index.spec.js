@@ -14,7 +14,7 @@ function authorizationHeader(user) {
 
 function createValidUser(firstName = 'Kriszi') {
   const user = new User({
-    email: firstName + '.balla@gmail.com',
+    email: `${firstName}.balla@gmail.com`,
     password: 'password',
     profile: { firstName: firstName, lastName: 'Balla' }
   });

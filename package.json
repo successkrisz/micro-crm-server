@@ -11,6 +11,7 @@
     "clean": "rimraf build",
     "start": "better-npm-run start",
     "lint": "eslint src test config",
+    "lint:watch": "esw --watch --color src test config",
     "lint:fix": "npm run lint -- --fix",
     "build": "npm run clean && babel src -d build",
     "serve": "better-npm-run serve",
@@ -60,6 +61,7 @@
     "eslint": "^3.13.1",
     "eslint-plugin-babel": "^4.0.0",
     "eslint-plugin-promise": "^3.4.0",
+    "eslint-watch": "^2.1.14",
     "mocha": "^3.2.0",
     "nodemon": "^1.11.0"
   },
