@@ -51,9 +51,13 @@ npm start
 ## API Endpoints
 
 Unprotected:
+
 - /POST /api/login : Authenticate user, if successful return a JWT
+
 Protected:
+
  *Requires Bearer JWT to be present in the Authorization header*
+
 - /GET /api/users : Retrieve all users from the database
 - /\* /api/user : Create/Edit/Retrieve/Delete user from database
 - /\* /api/client : Create/Edit/Retrieve/Delete client from database
