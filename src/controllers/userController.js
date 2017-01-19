@@ -7,7 +7,7 @@ const debug = _debug('app:userController');
 async function getAllUsers (ctx) {
     try {
         const users = await User.find();
-        
+
         ctx.body = users.map(cleanUser);
     } catch (error) {
         ctx.status = 500;
