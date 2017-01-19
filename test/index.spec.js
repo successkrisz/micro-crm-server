@@ -59,13 +59,13 @@ describe('Test API endpoints', () => {
           res.body[0].should.have.property('_id');
           res.body[0].should.have.property('createdAt');
           res.body[0].should.have.property('updatedAt');
-          res.body[0].should.have.property('role').eql('Member');
+          res.body[0].should.have.property('role').eql('member');
           res.body[1].should.have.property('email').eql('krisztian.balla@gmail.com');
           res.body[1].should.have.property('profile').eql({ firstName: 'Krisztian', lastName: 'Balla' });
           res.body[1].should.have.property('_id');
           res.body[1].should.have.property('createdAt');
           res.body[1].should.have.property('updatedAt');
-          res.body[1].should.have.property('role').eql('Member');
+          res.body[1].should.have.property('role').eql('member');
           resolve();
       });
         });
@@ -91,7 +91,7 @@ describe('Test API endpoints', () => {
           res.body.should.have.property('_id');
           res.body.should.have.property('createdAt');
           res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
+          res.body.should.have.property('role').eql('member');
           resolve();
       });
         });
@@ -147,7 +147,7 @@ describe('Test API endpoints', () => {
           res.body.should.have.property('_id');
           res.body.should.have.property('createdAt');
           res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
+          res.body.should.have.property('role').eql('member');
           resolve();
       });
         });
@@ -167,7 +167,7 @@ describe('Test API endpoints', () => {
           res.body.should.have.property('_id');
           res.body.should.have.property('createdAt');
           res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
+          res.body.should.have.property('role').eql('member');
           resolve();
       });
         });
@@ -219,7 +219,7 @@ describe('Test API endpoints', () => {
           res.body.should.have.property('_id');
           res.body.should.have.property('createdAt');
           res.body.should.have.property('updatedAt');
-          res.body.should.have.property('role').eql('Member');
+          res.body.should.have.property('role').eql('member');
           resolve();
       });
         });

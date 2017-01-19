@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+
 const Schema = mongoose.Schema;
 
 const ClientSchema = new Schema({
@@ -31,4 +32,4 @@ const ClientSchema = new Schema({
 
 ClientSchema.set('collection', 'clients');
 
-module.exports = mongoose.model('Client', ClientSchema);
+export default mongoose.model('Client', ClientSchema);

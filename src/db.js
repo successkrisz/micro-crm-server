@@ -6,6 +6,7 @@ const debug = _debug('app:db');
 export default function (config) {
     return new Promise((resolve, reject) => {
         if (mongoose.connection.readyState) { resolve(); }
+
         const keepAlive = (config.DBKeepAlive) ? 1 : 0;
         const options = {
             server: {

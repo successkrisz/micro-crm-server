@@ -36,7 +36,7 @@ describe('testing authenticationController', () => {
     it('generateToken should return jwt token', () => {
         const user = {
             email: 'email@gmail.com',
-            role: 'Member'
+            role: 'member'
         };
         const jwt = generateToken(user);
         const matchingPattern = isToken.test(jwt);
@@ -74,11 +74,11 @@ describe('testing authenticationController', () => {
         let ctx = mockCtx();
         const user = {
             email: 'kriszi.balla@gmail.com',
-            role: 'Member'
+            role: 'member'
         };
         const jwt = generateToken(user);
         ctx.header = { authorization: `Bearer ${jwt}` };
-        await roleAuthorization('Admin')(ctx);
+        await roleAuthorization('admin')(ctx);
         expect(ctx.status).to.equal(403);
     });
 
@@ -86,7 +86,7 @@ describe('testing authenticationController', () => {
         let ctx = mockCtx();
         const user = {
             email: 'kriszi.balla@gmail.com',
-            role: 'Member'
+            role: 'member'
         };
         const jwt = generateToken(user);
         ctx.header = { authorization: `Bearer ${jwt}` };

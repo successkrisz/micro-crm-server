@@ -5,23 +5,8 @@ import User from '../models/User';
 
 const jwtAlgorithmOptions = { algorithm: config.ALGORITHM };
 
-function headerHasToken(header) {
-    return (header.authorization && header.authorization.split(' ')[0] === 'Bearer');
-}
-
-function createJwtPayload(user) {
-    return {
-        exp: Math.floor(Date.now()/1000) + 3600,
-        data: { email: user.email, role: user.role }
-    };
-}
-
-export function generateToken(user) {
+function generateToken(user) {
     return jwt.sign(createJwtPayload(user), config.SECRET, jwtAlgorithmOptions);
-}
-
-function verifyToken(token) {
-    return jwt.verify(token, config.SECRET, jwtAlgorithmOptions);
 }
 
 export async function login(ctx) {
@@ -38,20 +23,40 @@ export async function login(ctx) {
     }
 }
 
-export function roleAuthorization(role = 'Member') {
+export function roleAuthorization(role = 'member') {
     return async function (ctx, next) {
         if (!headerHasToken(ctx)) { return ctx.status = 401; }
         try {
-            const token = ctx.header.authorization.split(' ')[1];
+            const token = extractToken(ctx);
             const user = verifyToken(token);
-            const userInDB = await User.findOne({email: user.data.email});
+            const userInDB = await User.findOne({ email: user.data.email });
 
-            if (userInDB.role === 'Owner') { return await next(); }
-            if (userInDB.role === 'Admin' && role !== 'Owner') { return await next(); }
+            if (userInDB.role === 'owner') { return await next(); }
+            if (userInDB.role === 'admin' && role !== 'owner') { return await next(); }
             if (userInDB.role !== role) { return ctx.status = 403; }
+
             return await next();
         } catch(e) {
             ctx.status = 401;
         }
     };
+}
+
+function headerHasToken(header) {
+    return (header.authorization && header.authorization.split(' ')[0] === 'Bearer');
+}
+
+function createJwtPayload(user) {
+    return {
+        exp: Math.floor(Date.now()/1000) + 3600,
+        data: { email: user.email, role: user.role }
+    };
+}
+
+function extractToken(ctx) {
+    return ctx.header.authorization.split(' ')[1];
+}
+
+function verifyToken(token) {
+    return jwt.verify(token, config.SECRET, jwtAlgorithmOptions);
 }

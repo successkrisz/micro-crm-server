@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt-nodejs';
+
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
@@ -23,7 +24,7 @@ const UserSchema = new Schema({
     },
     role: {
         type: String,
-        enum: ['Member', 'Client', 'Owner', 'Admin'],
+        enum: ['member', 'client', 'owner', 'admin'],
         default: 'Member'
     },
     resetPasswordToken: { type: String },
@@ -69,4 +70,4 @@ UserSchema.methods.comparePasswordSync = function(candidatePassword) {
     }
 };
 
-module.exports = mongoose.model('User', UserSchema);
+export default mongoose.model('User', UserSchema);
