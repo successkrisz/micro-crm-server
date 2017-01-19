@@ -7,17 +7,17 @@ import {
 
 const isToken = /^\S*\.\S*\.\S*$/;
 
-function mockCtx(body = {}){
+function mockCtx (body = {}) {
     return {
         body: '',
         header: '',
         params: {id: ''},
         request: {body: body},
-        status: '',
+        status: ''
     };
 }
 
-function createValidUser(firstName = 'Kriszi') {
+function createValidUser (firstName = 'Kriszi') {
     const user = new User({
         email: `${firstName}.balla@gmail.com`,
         password: 'password',
@@ -46,6 +46,7 @@ describe('testing authenticationController', () => {
             email: 'kriszi.balla@gmail.com',
             password: 'password'
         });
+
         await login(ctx);
         expect(ctx.body).to.have.property('token');
         const matchingPattern = isToken.test(ctx.body.token);
@@ -57,6 +58,7 @@ describe('testing authenticationController', () => {
             email: 'kriszi.balla@gmail.com',
             password: 'wrongPass'
         });
+
         await login(ctx);
         expect(ctx.body).to.have.property('error');
         expect(ctx.body.error).to.equal('You\'ve provided a wrong email address or password. Please try again!');
@@ -64,17 +66,14 @@ describe('testing authenticationController', () => {
 
     it('roleAuthorization should return 401 if there\'s no token', async () => {
         let ctx = mockCtx();
+
         await roleAuthorization()(ctx);
         expect(ctx.status).to.equal(401);
     });
 
     it('roleAuthorization should return 403 when role is not sufficient', async () => {
         let ctx = mockCtx();
-        const user = {
-            email: 'kriszi.balla@gmail.com',
-            role: 'member'
-        };
-        //const jwt = generateToken(user);
+
         ctx.header = { authorization: `Bearer ${validToken}` };
         await roleAuthorization('admin')(ctx);
         expect(ctx.status).to.equal(403);
@@ -82,14 +81,9 @@ describe('testing authenticationController', () => {
 
     it('roleAuthorization should call next() when role is sufficient', async () => {
         let ctx = mockCtx();
-        const user = {
-            email: 'kriszi.balla@gmail.com',
-            role: 'member'
-        };
-        //const jwt = generateToken(user);
-        console.log(validToken);
-        ctx.header = { authorization: `Bearer ${validToken}` };
         const mockNext = () => { ctx.status = 200; };
+
+        ctx.header = { authorization: `Bearer ${validToken}` };
         await roleAuthorization()(ctx, mockNext);
         expect(ctx.status).to.equal(200);
     });

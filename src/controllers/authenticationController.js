@@ -5,7 +5,7 @@ import User from '../models/User';
 
 const jwtAlgorithmOptions = { algorithm: config.ALGORITHM };
 
-export async function login(ctx) {
+export async function login (ctx) {
     try {
         const user = await User.findOne({ email: ctx.request.body.email });
         const match = user.comparePasswordSync(ctx.request.body.password);
@@ -16,13 +16,12 @@ export async function login(ctx) {
         }
         ctx.body = { token: generateToken(user) };
         return;
-
-    } catch(e) {
-        ctx.body = e;
+    } catch (error) {
+        ctx.body = error;
     }
 }
 
-export function roleAuthorization(role = 'member') {
+export function roleAuthorization (role = 'member') {
     return async function (ctx, next) {
         if (!headerHasToken(ctx.header)) {
             ctx.status = 401;
@@ -45,32 +44,31 @@ export function roleAuthorization(role = 'member') {
             }
 
             return await next();
-
-        } catch(e) {
+        } catch (error) {
             ctx.status = 401;
         }
     };
 }
 
-function generateToken(user) {
+function generateToken (user) {
     return jwt.sign(createJwtPayload(user), config.SECRET, jwtAlgorithmOptions);
 }
 
-function headerHasToken(header) {
+function headerHasToken (header) {
     return (header.authorization && header.authorization.split(' ')[0] === 'Bearer');
 }
 
-function createJwtPayload(user) {
+function createJwtPayload (user) {
     return {
-        exp: Math.floor(Date.now()/1000) + 3600,
+        exp: Math.floor(Date.now() / 1000) + 3600,
         data: { email: user.email, role: user.role }
     };
 }
 
-function extractToken(ctx) {
+function extractToken (ctx) {
     return ctx.header.authorization.split(' ')[1];
 }
 
-function verifyToken(token) {
+function verifyToken (token) {
     return jwt.verify(token, config.SECRET, jwtAlgorithmOptions);
 }

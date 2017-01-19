@@ -13,21 +13,21 @@ mongoose.connect(config.DBHost);
 
 chai.use(chaiHttp);
 
-function mockCtx(body = {}){
+function mockCtx (body = {}) {
     return {
         body: '',
         header: '',
         params: {id: ''},
         request: {body: body},
-        status: '',
+        status: ''
     };
 }
 
-function authorizationHeader(token) {
+function authorizationHeader (token) {
     return `Bearer ${token}`;
 }
 
-function createValidUser(firstName = 'Kriszi') {
+function createValidUser (firstName = 'Kriszi') {
     const user = new User({
         email: `${firstName}.balla@gmail.com`,
         password: 'password',
@@ -46,7 +46,7 @@ describe('Test API endpoints', () => {
 
     beforeEach(async () => {
         await User.remove({});
-        const user = await createValidUser('Anonimous');
+        await createValidUser('Anonimous');
         let ctx = mockCtx({
             email: 'anonimous.balla@gmail.com',
             password: 'password'
@@ -61,7 +61,7 @@ describe('Test API endpoints', () => {
             chai.request(server)
       .get('/api/users')
       .set('Authorization', authorizationHeader(validToken))
-      .end((err, res) => {
+      .end((error, res) => {
           res.should.have.status(200);
           res.body.should.be.a('array');
           res.body.length.should.be.eql(2);
@@ -93,7 +93,7 @@ describe('Test API endpoints', () => {
       .post('/api/user')
       .set('Authorization', authorizationHeader(validToken))
       .send(newUser)
-      .end((err,res) => {
+      .end((error, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
@@ -107,7 +107,7 @@ describe('Test API endpoints', () => {
         });
     });
 
-    it('/POST /api/user : should return error when password not provided', async () => {
+    it('/POST /api/user : should return erroror when password not provided', async () => {
         const newUser = {
             email: 'kriszi.balla@gmail.com',
             firstName: 'Kriszi',
@@ -118,7 +118,7 @@ describe('Test API endpoints', () => {
       .post('/api/user')
       .set('Authorization', authorizationHeader(validToken))
       .send(newUser)
-      .end((err,res) => {
+      .end((error, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('password');
@@ -134,7 +134,7 @@ describe('Test API endpoints', () => {
             chai.request(server)
       .get('/api/user/123456789')
       .set('Authorization', authorizationHeader(validToken))
-      .end((err,res) => {
+      .end((error, res) => {
           res.should.have.status(404);
           resolve();
       });
@@ -147,7 +147,7 @@ describe('Test API endpoints', () => {
             chai.request(server)
       .get('/api/user/' + user._id)
       .set('Authorization', authorizationHeader(validToken))
-      .end((err,res) => {
+      .end((error, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
@@ -167,7 +167,7 @@ describe('Test API endpoints', () => {
             chai.request(server)
       .delete('/api/user/' + user._id)
       .set('Authorization', authorizationHeader(validToken))
-      .end((err,res) => {
+      .end((error, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('email').eql('kriszi.balla@gmail.com');
@@ -186,7 +186,7 @@ describe('Test API endpoints', () => {
             chai.request(server)
       .delete('/api/user/123456789')
       .set('Authorization', authorizationHeader(validToken))
-      .end((err,res) => {
+      .end((error, res) => {
           res.should.have.status(404);
           resolve();
       });
@@ -199,8 +199,8 @@ describe('Test API endpoints', () => {
             chai.request(server)
       .put('/api/user')
       .set('Authorization', authorizationHeader(validToken))
-      .send(Object.assign({}, user, { _id:'123456789' }))
-      .end((err,res) => {
+      .send(Object.assign({}, user, { _id: '123456789' }))
+      .end((error, res) => {
           res.should.have.status(404);
           resolve();
       });
@@ -218,7 +218,7 @@ describe('Test API endpoints', () => {
       .put('/api/user')
       .set('Authorization', authorizationHeader(validToken))
       .send(newUser)
-      .end((err,res) => {
+      .end((error, res) => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('email').eql('john.doe@yahoo.com');

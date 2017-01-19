@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import clientController from '../../src/controllers/clientController';
 import Client from '../../src/models/Client';
 
-function mockCtx(body = {}){
+function mockCtx (body = {}) {
     return {
         request: {body: body},
         body: '',
@@ -219,5 +219,4 @@ describe('Client Controller: ', () => {
         await clientController.deleteClient(ctx);
         expect(ctx.status).to.have.equal(404);
     });
-
 });

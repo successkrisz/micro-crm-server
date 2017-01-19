@@ -18,7 +18,7 @@ export default function (config) {
             replset: {
                 socketOptions: {
                     keepAlive: keepAlive,
-                    connectTimeoutMS : config.DBConnectTimeoutMS
+                    connectTimeoutMS: config.DBConnectTimeoutMS
                 }
             }
         };

@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import userController from '../../src/controllers/userController';
 import User from '../../src/models/User';
 
-function mockCtx(body = {}){
+function mockCtx (body = {}) {
     return {
         request: {body: body},
         body: '',
@@ -128,7 +128,7 @@ describe('User Controller: ', () => {
         const savedUser = await user1.save();
         let ctx = mockCtx({
             _id: savedUser['_id'],
-            email: 'daniel.balla@gmail.com',
+            email: 'daniel.balla@gmail.com'
         });
         await userController.updateUser(ctx);
         expect(ctx.body).to.have.property('_id');
@@ -193,5 +193,4 @@ describe('User Controller: ', () => {
         await userController.deleteUser(ctx);
         expect(ctx.status).to.have.equal(404);
     });
-
 });

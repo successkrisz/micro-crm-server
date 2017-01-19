@@ -9,7 +9,7 @@ import router from './routing';
 const debug = _debug('app:server');
 const isTestEnv = (process.env.NODE_ENV === 'test');
 
-async function contextLogger(ctx, next) {
+async function contextLogger (ctx, next) {
     debug(ctx);
     return await next();
 }
