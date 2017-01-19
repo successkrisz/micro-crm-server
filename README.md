@@ -13,6 +13,12 @@ which is currently under development.
 - npm
 - node.js
 
+## Features
+
+- Authentication with Json Web Tokens
+- User management
+- Client management
+
 ## Setup
 
 Clone the project:
@@ -41,5 +47,15 @@ npm start
 - **npm test**: runs the tests located in the /test folder
 - **npm build**: build a production version of the app to the /build folder
 - **npm serve**: serves the production build
+
+## API Endpoints
+
+Unprotected:
+- /POST /api/login : Authenticate user, if successful return a JWT
+Protected:
+ *Requires Bearer JWT to be present in the Authorization header*
+- /GET /api/users : Retrieve all users from the database
+- /\* /api/user : Create/Edit/Retrieve/Delete user from database
+- /\* /api/client : Create/Edit/Retrieve/Delete client from database
 
 Happy Hacking!
