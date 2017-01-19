@@ -2,7 +2,7 @@ import chai from 'chai';
 import chaiHttp from 'chai-http';
 import app from '../index';
 import User from '../src/models/User';
-import { generateToken } from '../src/controllers/authenticationController';
+import { login } from '../src/controllers/authenticationController';
 import mongoose from 'mongoose';
 import config from 'config';
 
@@ -12,8 +12,15 @@ mongoose.connect(config.DBHost);
 
 chai.use(chaiHttp);
 
-function authorizationHeader(user) {
-    return 'Bearer ' + generateToken(user);
+async function authorizationHeader() {
+    let ctx = mockCtx({
+        email: 'kriszi.balla@gmail.com',
+        password: 'password'
+    });
+
+    await login(ctx);
+
+    return 'Bearer ' + ctx.body.token;
 }
 
 function createValidUser(firstName = 'Kriszi') {
@@ -192,7 +199,7 @@ describe('Test API endpoints', () => {
             chai.request(server)
       .put('/api/user')
       .set('Authorization', authorizationHeader(user))
-      .send(Object.assign({_id:'123456789'}, user))
+      .send(Object.assign({}, user, { _id:'123456789' }))
       .end((err,res) => {
           res.should.have.status(404);
           resolve();

@@ -15,9 +15,12 @@ export async function login(ctx) {
         const match = user.comparePasswordSync(ctx.request.body.password);
 
         if (!match) {
-            return ctx.body = { error: 'You\'ve provided a wrong email address or password. Please try again!' };
+            ctx.body = { error: 'You\'ve provided a wrong email address or password. Please try again!' };
+            return;
         }
         ctx.body = { token: generateToken(user) };
+        return;
+
     } catch(e) {
         ctx.body = e;
     }
@@ -25,19 +28,31 @@ export async function login(ctx) {
 
 export function roleAuthorization(role = 'member') {
     return async function (ctx, next) {
-        if (!headerHasToken(ctx)) { return ctx.status = 401; }
+        if (!headerHasToken(ctx)) {
+            ctx.status = 401;
+            return;
+        }
         try {
             const token = extractToken(ctx);
             const user = verifyToken(token);
             const userInDB = await User.findOne({ email: user.data.email });
 
-            if (userInDB.role === 'owner') { return await next(); }
-            if (userInDB.role === 'admin' && role !== 'owner') { return await next(); }
-            if (userInDB.role !== role) { return ctx.status = 403; }
+            if (userInDB.role === 'owner') {
+                return await next();
+            }
+            if (userInDB.role === 'admin' && role !== 'owner') {
+                return await next();
+            }
+            if (userInDB.role !== role) {
+                ctx.status = 403;
+                return;
+            }
 
             return await next();
+
         } catch(e) {
             ctx.status = 401;
+            return;
         }
     };
 }

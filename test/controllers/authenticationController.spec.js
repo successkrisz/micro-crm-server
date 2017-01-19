@@ -1,7 +1,6 @@
 import { expect } from 'chai';
 import User from '../../src/models/User';
 import {
-  generateToken,
   login,
   roleAuthorization
   } from '../../src/controllers/authenticationController';
@@ -31,16 +30,6 @@ describe('testing authenticationController', () => {
     beforeEach(async () => {
         await User.remove({});
         await createValidUser();
-    });
-
-    it('generateToken should return jwt token', () => {
-        const user = {
-            email: 'email@gmail.com',
-            role: 'member'
-        };
-        const jwt = generateToken(user);
-        const matchingPattern = isToken.test(jwt);
-        expect(matchingPattern).to.equal(true);
     });
 
     it('login should return token when when email and password match', async () => {
