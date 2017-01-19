@@ -12,7 +12,6 @@ import connectToDB from '../src/db';
         app.listen(port);
 
         debug(`Server is now running at http://${host}:${port}.`);
-        debug(`Server accessible via localhost:${port} if you are using the project defaults.`);
     }catch(error) {
         debug(`Shutting server down due to error: ${error}`);
     }
