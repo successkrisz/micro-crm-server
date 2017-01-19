@@ -1,6 +1,6 @@
 import chai from 'chai';
 import chaiHttp from 'chai-http';
-import app from '../src/index';
+import app from '../index';
 import User from '../src/models/User';
 import { generateToken } from '../src/controllers/authenticationController';
 import mongoose from 'mongoose';
