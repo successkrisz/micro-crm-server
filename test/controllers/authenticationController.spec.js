@@ -27,9 +27,18 @@ function createValidUser(firstName = 'Kriszi') {
 }
 
 describe('testing authenticationController', () => {
+    var validToken;
+
     beforeEach(async () => {
         await User.remove({});
         await createValidUser();
+
+        let ctx = mockCtx({
+            email: 'kriszi.balla@gmail.com',
+            password: 'password'
+        });
+        await login(ctx);
+        validToken = ctx.body.token;
     });
 
     it('login should return token when when email and password match', async () => {
@@ -65,8 +74,8 @@ describe('testing authenticationController', () => {
             email: 'kriszi.balla@gmail.com',
             role: 'member'
         };
-        const jwt = generateToken(user);
-        ctx.header = { authorization: `Bearer ${jwt}` };
+        //const jwt = generateToken(user);
+        ctx.header = { authorization: `Bearer ${validToken}` };
         await roleAuthorization('admin')(ctx);
         expect(ctx.status).to.equal(403);
     });
@@ -77,8 +86,9 @@ describe('testing authenticationController', () => {
             email: 'kriszi.balla@gmail.com',
             role: 'member'
         };
-        const jwt = generateToken(user);
-        ctx.header = { authorization: `Bearer ${jwt}` };
+        //const jwt = generateToken(user);
+        console.log(validToken);
+        ctx.header = { authorization: `Bearer ${validToken}` };
         const mockNext = () => { ctx.status = 200; };
         await roleAuthorization()(ctx, mockNext);
         expect(ctx.status).to.equal(200);

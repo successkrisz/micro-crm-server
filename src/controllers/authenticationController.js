@@ -5,10 +5,6 @@ import User from '../models/User';
 
 const jwtAlgorithmOptions = { algorithm: config.ALGORITHM };
 
-function generateToken(user) {
-    return jwt.sign(createJwtPayload(user), config.SECRET, jwtAlgorithmOptions);
-}
-
 export async function login(ctx) {
     try {
         const user = await User.findOne({ email: ctx.request.body.email });
@@ -28,7 +24,7 @@ export async function login(ctx) {
 
 export function roleAuthorization(role = 'member') {
     return async function (ctx, next) {
-        if (!headerHasToken(ctx)) {
+        if (!headerHasToken(ctx.header)) {
             ctx.status = 401;
             return;
         }
@@ -52,9 +48,12 @@ export function roleAuthorization(role = 'member') {
 
         } catch(e) {
             ctx.status = 401;
-            return;
         }
     };
+}
+
+function generateToken(user) {
+    return jwt.sign(createJwtPayload(user), config.SECRET, jwtAlgorithmOptions);
 }
 
 function headerHasToken(header) {
