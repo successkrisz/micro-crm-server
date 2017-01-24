@@ -19,7 +19,7 @@
     }
   },
   "rules": {
-    "indent": ["error", 4],
+    "indent": ["error", 2],
     "max-len": [2, 120, 2],
     "generator-star-spacing": ["error", "before"],
     "linebreak-style": ["error", "unix"],
