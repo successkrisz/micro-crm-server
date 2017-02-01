@@ -3,7 +3,7 @@
     "DBKeepAlive": true,
     "DBConnectTimeoutMS": 30000,
     "server_host": "localhost",
-    "server_port": "3003",
+    "server_port": "3000",
     "SECRET": "boaconstrictor",
     "ALGORITHM": "HS256",
     "LOGGING_CONTEXT": true
